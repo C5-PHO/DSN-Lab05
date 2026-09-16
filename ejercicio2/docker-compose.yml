@@ -1,0 +1,28 @@
+services:
+  app:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - .:/app:ro
+    ports:
+      - "3000:3000"
+    command: node server.js
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: miapp
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d miapp"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
